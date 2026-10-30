@@ -84,6 +84,23 @@ export const setDomainShortLinks = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const setDomainRootRedirect = createServerFn({ method: "POST" })
+  .middleware([requireAuth])
+  .inputValidator((data) =>
+    z.object({ id: z.string().uuid(), type: z.enum(["profile_hub", "custom_url", "rout_main", "none"]), url: z.string().max(2048).nullable().optional() }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { validRootRedirectUrl } = await import("./root-redirect");
+    let url: string | null = null;
+    if (data.type === "custom_url") {
+      url = validRootRedirectUrl(data.url);
+      if (!url) throw new Error("Vul een geldige https://-link in.");
+    }
+    const { setRootRedirectFor } = await import("./domains.server");
+    await setRootRedirectFor(context.userId, data.id, data.type, url);
+    return { ok: true };
+  });
+
 export const deleteCustomDomain = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
