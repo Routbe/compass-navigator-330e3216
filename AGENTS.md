@@ -65,6 +65,6 @@
 - Profile glass/scoped styling comes only from pure `src/lib/theme-engine.ts` (global `glass*` prefs + `themeOverrides[scope]`). Why: one rule for the Studio controls and the public page.
 - Security events are written only via `recordSecurityEvent` (audit-log.server.ts) into append-only, DB-hash-chained `security_audit_logs` (db/0127); rules in pure audit-chain.ts. Why: tampering must be provable.
 
-- Rate limits use a two-bucket sliding window (`decideSlidingLimit` in rate-limit-rules.ts) over the Neon `rate_limits` table; public routes call `guardShared`. Why: fixed windows allowed double bursts at boundaries and per-worker memory is not shared.
-- "/" on a verified custom domain is decided only by pure `root-redirect.ts` (db/0128 `root_redirect_type/url`), applied in `customDomainRootMiddleware` in src/start.ts; custom URLs must pass `validRootRedirectUrl`. Why: one tested rule, no open redirects.
-- Hold back a migration by applying others with `migrate-gateway.ts --only=<files>`. Why: some files wait on a deploy.
+- Rate limits: two-bucket sliding window (`decideSlidingLimit`) over Neon `rate_limits`; public routes use `guardShared`. Why: no boundary bursts, shared across workers.
+- Custom-domain "/" redirects come only from pure `root-redirect.ts` (db/0128), applied in src/start.ts. Why: one tested rule, no open redirects.
+- Hold back a migration via `migrate-gateway.ts --only=<files>`. Why: some wait on a deploy.
