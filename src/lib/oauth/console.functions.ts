@@ -102,6 +102,8 @@ export const saveOAuthClient = createServerFn({ method: "POST" })
       if (data.id) {
         return { client: await updateClient(context.userId, data.id, input), clientSecret: null };
       }
+      const { ensureStepUpSession } = await import("@/lib/auth/step-up.server");
+      await ensureStepUpSession(context.userId, "oauth_secret");
       const { hitRateLimit } = await import("@/lib/rate-limit-db.server");
       const { RATE_RULES } = await import("@/lib/rate-limit-rules");
       const limit = await hitRateLimit("app-create", context.userId, RATE_RULES.appCreate);
