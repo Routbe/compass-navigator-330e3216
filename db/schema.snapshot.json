@@ -112,7 +112,12 @@
       "max": "9223372036854775807",
       "cycle": false,
       "ownedBy": "public.security_audit_logs.id",
-      "grants": {}
+      "grants": {
+        "rout_app": [
+          "SELECT",
+          "USAGE"
+        ]
+      }
     }
   ],
   "tables": [
@@ -1272,8 +1277,10 @@
       ],
       "grants": {
         "rout_app": [
+          "DELETE",
           "INSERT",
-          "SELECT"
+          "SELECT",
+          "UPDATE"
         ]
       }
     },
@@ -1354,6 +1361,7 @@
       ],
       "grants": {
         "rout_app": [
+          "DELETE",
           "INSERT",
           "SELECT",
           "UPDATE"
@@ -3776,7 +3784,7 @@
         {
           "name": "booking_event_types_duration_minutes_check",
           "kind": "c",
-          "def": "CHECK (((duration_minutes >= 5) AND (duration_minutes <= 480) AND ((duration_minutes % 5) = 0)))"
+          "def": "CHECK ((((duration_minutes >= 5) AND (duration_minutes <= 480)) AND ((duration_minutes % 5) = 0)))"
         },
         {
           "name": "booking_event_types_location_kind_check",
@@ -12236,7 +12244,14 @@
       "rls": true,
       "forceRls": false,
       "policies": [],
-      "grants": {}
+      "grants": {
+        "rout_app": [
+          "DELETE",
+          "INSERT",
+          "SELECT",
+          "UPDATE"
+        ]
+      }
     },
     {
       "schema": "public",
@@ -12352,7 +12367,14 @@
       "rls": true,
       "forceRls": false,
       "policies": [],
-      "grants": {}
+      "grants": {
+        "rout_app": [
+          "DELETE",
+          "INSERT",
+          "SELECT",
+          "UPDATE"
+        ]
+      }
     },
     {
       "schema": "public",
@@ -16079,6 +16101,14 @@
           "generated": "lower(email)"
         },
         {
+          "name": "password_hash",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": null,
+          "generated": null
+        },
+        {
           "name": "email_confirmed_at",
           "type": "timestamp with time zone",
           "notNull": false,
@@ -16367,6 +16397,124 @@
       "rls": true,
       "forceRls": false,
       "policies": [],
+      "grants": {
+        "rout_app": [
+          "DELETE",
+          "INSERT",
+          "SELECT",
+          "UPDATE"
+        ]
+      }
+    },
+    {
+      "schema": "public",
+      "name": "verified_identities",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "identity_nullifier",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "provider",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "tier",
+          "type": "text",
+          "notNull": true,
+          "default": "'tier_1_real_human'::text",
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "method_details",
+          "type": "jsonb",
+          "notNull": true,
+          "default": "'{}'::jsonb",
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "verified_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": "now()",
+          "identity": null,
+          "generated": null
+        }
+      ],
+      "constraints": [
+        {
+          "name": "verified_identities_identity_nullifier_key",
+          "kind": "u",
+          "def": "UNIQUE (identity_nullifier)"
+        },
+        {
+          "name": "verified_identities_pkey",
+          "kind": "p",
+          "def": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "verified_identities_provider_check",
+          "kind": "c",
+          "def": "CHECK ((provider = ANY (ARRAY['didit'::text, 'w_identity'::text, 'itsme'::text, 'eid'::text])))"
+        },
+        {
+          "name": "verified_identities_tier_check",
+          "kind": "c",
+          "def": "CHECK ((tier = ANY (ARRAY['tier_1_real_human'::text, 'tier_2_legal_identity'::text])))"
+        },
+        {
+          "name": "verified_identities_user_id_fkey",
+          "kind": "f",
+          "def": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
+        },
+        {
+          "name": "verified_identities_user_id_key",
+          "kind": "u",
+          "def": "UNIQUE (user_id)"
+        }
+      ],
+      "indexes": [],
+      "triggers": [],
+      "rls": true,
+      "forceRls": false,
+      "policies": [
+        {
+          "name": "rout_scope",
+          "permissive": true,
+          "roles": [
+            "public"
+          ],
+          "cmd": "SELECT",
+          "using": "(user_id = rout_current_user_id())",
+          "check": null
+        }
+      ],
       "grants": {
         "rout_app": [
           "DELETE",
@@ -16726,6 +16874,7 @@
       "policies": [],
       "grants": {
         "rout_app": [
+          "DELETE",
           "INSERT",
           "SELECT",
           "UPDATE"
@@ -17542,7 +17691,7 @@
         {
           "name": "workspaces_slug_check",
           "kind": "c",
-          "def": "CHECK (((char_length(slug) >= 3) AND (char_length(slug) <= 40) AND (slug ~ '^[a-z0-9-]+$'::text) AND (slug <> ALL (ARRAY['admin'::text, 'api'::text, 'auth'::text, 'u'::text, 'w'::text, 'studio'::text, 'settings'::text, 'rout'::text])))) NOT VALID"
+          "def": "CHECK ((((char_length(slug) >= 3) AND (char_length(slug) <= 40)) AND (slug ~ '^[a-z0-9-]+$'::text) AND (slug <> ALL (ARRAY['admin'::text, 'api'::text, 'auth'::text, 'u'::text, 'w'::text, 'studio'::text, 'settings'::text, 'rout'::text])))) NOT VALID"
         },
         {
           "name": "workspaces_slug_key",
