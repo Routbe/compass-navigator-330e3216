@@ -43,6 +43,21 @@ export const STRICT_CSP = [
 ].join("; ");
 
 /**
+ * CSP for every public page (profiles, links, home): scripts only from our own
+ * origin (+ Stripe.js), no plugins, no foreign forms or <base>. Inline scripts
+ * stay allowed because TanStack SSR hydration emits them; removing them needs
+ * per-request nonces from the framework.
+ */
+export const PUBLIC_CSP = [
+  "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://js.stripe.com",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self' https:",
+  "worker-src 'self' blob:",
+  FRAME_ANCESTORS,
+].join("; ");
+
+/**
  * Route-aware headers. Public pages (profiles, home) stay maximally compatible
  * (no COOP, cross-origin CORP) so browsers like Opera never answer
  * ERR_BLOCKED_BY_RESPONSE; /auth and /settings get a strict CSP plus
@@ -62,7 +77,7 @@ export function securityHeaders(isHttps: boolean, pathname = "/"): Record<string
     h["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups";
     h["Cross-Origin-Resource-Policy"] = "same-origin";
   } else {
-    h["Content-Security-Policy"] = `${FRAME_ANCESTORS}; base-uri 'self'; object-src 'none'`;
+    h["Content-Security-Policy"] = PUBLIC_CSP;
     h["Cross-Origin-Opener-Policy"] = "unsafe-none";
     h["Cross-Origin-Resource-Policy"] = "cross-origin";
   }

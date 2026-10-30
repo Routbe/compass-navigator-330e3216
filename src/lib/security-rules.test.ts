@@ -97,3 +97,13 @@ describe("sliding window rate limit", () => {
     expect(decideSlidingLimit(10, 1, rule, 59_000).ok).toBe(true);
   });
 });
+
+describe("public page CSP", () => {
+  it("blocks third-party scripts and plugins on public profiles", () => {
+    const csp = securityHeaders(true, "/jan")["Content-Security-Policy"] ?? "";
+    expect(csp).toContain("script-src 'self'");
+    expect(csp).not.toMatch(/script-src[^;]*\shttps:(\s|;|$)/);
+    expect(csp).toContain("object-src 'none'");
+    expect(csp).toContain("base-uri 'self'");
+  });
+});
