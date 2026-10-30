@@ -1,6 +1,7 @@
 import { useState, type ComponentType, type SVGProps } from "react";
 import {
   Calendar,
+  CalendarCheck,
   Coffee,
   CreditCard,
   Github,
@@ -162,6 +163,8 @@ const NAME_MAP: Record<string, PlatformIcon> = {
   shop: ShoppingBag,
   spotify: Music,
   spotify_artist: Music,
+  booking_request: CalendarCheck,
+  booking: CalendarCheck,
   vimeo: VimeoMark,
   dailymotion: DailymotionMark,
   peertube: PeertubeMark,
