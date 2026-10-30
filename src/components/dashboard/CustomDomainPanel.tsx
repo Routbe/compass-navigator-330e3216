@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { InfoHint } from "@/components/InfoHint";
+import { DomainRootDestination } from "./DomainRootDestination";
 import {
   DOMAIN_CNAME_TARGET,
   addCustomDomain,
@@ -26,6 +27,8 @@ interface DomainRow {
   domain: string;
   status: string;
   verification_token: string;
+  root_redirect_type?: string | null;
+  root_redirect_url?: string | null;
 }
 
 /**
@@ -228,6 +231,9 @@ export function CustomDomainPanel() {
               >
                 <Trash2 className="h-3.5 w-3.5" aria-hidden />
               </Button>
+              {row.status === "verified" && (
+                <DomainRootDestination id={row.id} domain={row.domain} type={row.root_redirect_type} url={row.root_redirect_url} />
+              )}
               {row.status !== "verified" && (
                 <div className="w-full space-y-1.5 rounded-md bg-muted p-2 text-xs">
                   <p className="text-muted-foreground">Maak deze records aan bij je domeinregistrar:</p>
