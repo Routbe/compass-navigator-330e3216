@@ -86,11 +86,13 @@
 - [x] F3 sliding-window rate limiter (Neon) op publieke endpoints + CSP publieke profielen
 - [x] F4 X-Rout-Signature webhooks + retry-queue; client_credentials (15 min)
 - [x] Platform-iconen (PeerTube, Vimeo, Dailymotion, Tumblr, Lemmy, Misskey) + booking-icoon
-- [ ] /studio/account: identiteitskaart dynamisch, betaling niet als verificatie, 'Sociale accounts & verificatie' weg
-- [ ] Beveiligingscentrum (3 lagen) + user_mfa_methods + vertalingen + herstelcodes met step-up
-- [ ] Sticky tabbalken + actieve tab in beeld
+- [x] /studio/account: identiteitskaart + 'Sociale accounts & verificatie' weg
+- [ ] Betaalde €3,99-verificatie (Early Believer) schrappen — wacht op keuze gebruiker (wat met bestaande betaalde vinkjes?)
+- [x] Vertalingen accountpagina
+- [ ] Beveiligingscentrum (3 lagen) + user_mfa_methods (db/0130) + herstelcodes met step-up + SMS-2FA (wacht op SMS-dienst)
+- [x] Sticky tabbalken + actieve tab in beeld
 - [x] Custom domain root redirect (db/0128) + Studio-keuze
 - [ ] Scoped theme: overrides ook voor vorm/typografie/radius/kleuren
 - [x] Neon gekoppeld (31/10): 141 tabellen, alleen 0125 bewust open
 - [ ] Webhook-eindpunten beheren in console (UI + URL-check tegen privé-adressen)
-- [ ] Nieuwe migraties 0128-0130 op Neon toepassen
+- [x] 0128 + 0129 op Neon toegepast (migrate-gateway --only=...)

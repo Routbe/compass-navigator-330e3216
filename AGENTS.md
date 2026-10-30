@@ -64,3 +64,9 @@
 - Authenticated server functions run inside `withDbContext` (src/lib/neon.ts), so each query is a transaction that first sets `rout.user_id`/`rout.workspace_id`; RLS never trusts `rout.workspace_id`. Why: RLS can only be enforced when the database knows the caller.
 - Profile glass/scoped styling comes only from pure `src/lib/theme-engine.ts` (global `glass*` prefs + `themeOverrides[scope]`). Why: one rule for the Studio controls and the public page.
 - Security events are written only via `recordSecurityEvent` (audit-log.server.ts) into append-only, DB-hash-chained `security_audit_logs` (db/0127); rules in pure audit-chain.ts. Why: tampering must be provable.
+
+- Rate limits use a two-bucket sliding window (`decideSlidingLimit` in rate-limit-rules.ts) over the Neon `rate_limits` table; public routes call `guardShared`. Why: fixed windows allowed double bursts at boundaries and per-worker memory is not shared.
+- "/" on a verified custom domain is decided only by pure `root-redirect.ts` (db/0128 `root_redirect_type/url`), applied in `customDomainRootMiddleware` in src/start.ts; custom URLs must pass `validRootRedirectUrl`. Why: one tested rule, no open redirects.
+- Outbound webhooks are signed only via `webhooks/signature.ts` (`X-Rout-Signature: t=..,v1=hmac`) and delivered from the `webhook_deliveries` queue by the deliver-webhooks cron with `nextRetryDelaySec` backoff; endpoint secrets are sealed. Why: receivers can verify origin and replay window, failures retry without blocking.
+- client_credentials tokens follow pure `oauth/m2m-rules.ts` (exactly 900 s, never identity scopes, confidential clients only). Why: a machine token must never act as a person.
+- Hold back a migration by applying others with `migrate-gateway.ts --only=<files>`. Why: some files wait on a deploy.
