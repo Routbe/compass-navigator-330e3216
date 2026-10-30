@@ -157,7 +157,7 @@ export default function AccountSettings() {
       .update({ display_name: displayName.trim() || null, avatar_url: avatarUrl })
       .eq("id", user.id);
     setSavingProfile(false);
-    if (!result.ok) return toast.error(result.message ?? "Could not save your profile.");
+    if (!result.ok) return toast.error(result.message ?? "Je profiel kon niet opgeslagen worden.");
     if (profileError) return toast.error(profileError.message);
     toast.success("Profile saved");
   };
@@ -202,10 +202,10 @@ export default function AccountSettings() {
       console.error("[2fa] enable failed", e.code, e.status, e.message);
       if (e.code === "INVALID_PASSWORD") {
         return toast.error(mfaPassword
-          ? "That password is not correct."
-          : "Your account has a password: enter it once to start 2FA setup.");
+          ? "Dit wachtwoord klopt niet."
+          : "Je account heeft een wachtwoord: vul het één keer in om 2FA in te stellen.");
       }
-      if (e.status === 401) return toast.error("Your session expired. Sign in again and retry.");
+      if (e.status === 401) return toast.error("Je sessie is verlopen. Log opnieuw in en probeer nog eens.");
       return toast.error(`Could not start 2FA setup${e.message ? `: ${e.message}` : "."}`);
     }
     setMfaUri(res.data.totpURI);
@@ -216,7 +216,7 @@ export default function AccountSettings() {
     setMfaBusy(true);
     const res = await authClient.twoFactor.verifyTotp({ code: mfaCode });
     setMfaBusy(false);
-    if (res.error) return toast.error(res.error.message ?? "That code is not correct.");
+    if (res.error) return toast.error(res.error.message ?? "Deze code klopt niet.");
     setMfaEnabled(true);
     setMfaDialogOpen(false);
     toast.success("Two-factor authentication is on.");
@@ -238,7 +238,7 @@ export default function AccountSettings() {
       if (!ok) return toast.error("Deze code klopt niet of is verlopen.");
     }
     const res = await authClient.twoFactor.disable({ password: password || undefined } as never);
-    if (res.error) return toast.error(res.error.message ?? "Could not turn off 2FA.");
+    if (res.error) return toast.error(res.error.message ?? "2FA kon niet uitgeschakeld worden.");
     setMfaEnabled(false);
     toast.success("Two-factor authentication is off.");
   };
@@ -271,7 +271,7 @@ export default function AccountSettings() {
       URL.revokeObjectURL(url);
       toast.success("Export downloaded");
     } catch {
-      toast.error("Could not export account data.");
+      toast.error("Je accountgegevens konden niet geëxporteerd worden.");
     } finally {
       setExporting(false);
     }
@@ -580,7 +580,7 @@ export default function AccountSettings() {
       <Dialog open={mfaDialogOpen} onOpenChange={setMfaDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Set up authenticator app</DialogTitle>
+            <DialogTitle>Authenticator-app instellen</DialogTitle>
             <DialogDescription>
               Scan this QR code with your authenticator app, then enter the 6-digit code to confirm.
             </DialogDescription>
