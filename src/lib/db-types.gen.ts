@@ -1715,6 +1715,16 @@ export interface PublicVerificationPaymentsRow {
   "last_scanned_at": string | Date | null;
 }
 
+export interface PublicVerifiedIdentitiesRow {
+  "id": string;
+  "user_id": string;
+  "identity_nullifier": string;
+  "provider": string;
+  "tier": string;
+  "method_details": JsonValue;
+  "verified_at": string | Date;
+}
+
 export interface PublicWalletTransactionsRow {
   "id": string;
   "user_id": string;
@@ -1989,6 +1999,7 @@ export interface DbTables {
   "public.user_snapchat": PublicUserSnapchatRow;
   "public.users": PublicUsersRow;
   "public.verification_payments": PublicVerificationPaymentsRow;
+  "public.verified_identities": PublicVerifiedIdentitiesRow;
   "public.wallet_transactions": PublicWalletTransactionsRow;
   "public.wallets": PublicWalletsRow;
   "public.webhook_deliveries": PublicWebhookDeliveriesRow;

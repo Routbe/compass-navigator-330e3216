@@ -16378,6 +16378,123 @@
     },
     {
       "schema": "public",
+      "name": "verified_identities",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "identity_nullifier",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "provider",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "tier",
+          "type": "text",
+          "notNull": true,
+          "default": "'tier_1_real_human'::text",
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "method_details",
+          "type": "jsonb",
+          "notNull": true,
+          "default": "'{}'::jsonb",
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "verified_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": "now()",
+          "identity": null,
+          "generated": null
+        }
+      ],
+      "constraints": [
+        {
+          "name": "verified_identities_identity_nullifier_key",
+          "kind": "u",
+          "def": "UNIQUE (identity_nullifier)"
+        },
+        {
+          "name": "verified_identities_pkey",
+          "kind": "p",
+          "def": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "verified_identities_provider_check",
+          "kind": "c",
+          "def": "CHECK ((provider = ANY (ARRAY['didit'::text, 'w_identity'::text, 'itsme'::text, 'eid'::text])))"
+        },
+        {
+          "name": "verified_identities_tier_check",
+          "kind": "c",
+          "def": "CHECK ((tier = ANY (ARRAY['tier_1_real_human'::text, 'tier_2_legal_identity'::text])))"
+        },
+        {
+          "name": "verified_identities_user_id_fkey",
+          "kind": "f",
+          "def": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
+        },
+        {
+          "name": "verified_identities_user_id_key",
+          "kind": "u",
+          "def": "UNIQUE (user_id)"
+        }
+      ],
+      "indexes": [],
+      "triggers": [],
+      "rls": true,
+      "forceRls": false,
+      "policies": [
+        {
+          "name": "rout_scope",
+          "permissive": true,
+          "roles": [
+            "public"
+          ],
+          "cmd": "SELECT",
+          "using": "(user_id = rout_current_user_id())",
+          "check": null
+        }
+      ],
+      "grants": {
+        "rout_app": [
+          "INSERT",
+          "SELECT",
+          "UPDATE"
+        ]
+      }
+    },
+    {
+      "schema": "public",
       "name": "wallet_transactions",
       "columns": [
         {
