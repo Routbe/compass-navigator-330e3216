@@ -82,3 +82,18 @@ describe("security headers", () => {
     expect(sessionCookieProblems("rout_session=a; Path=/")).toEqual(["HttpOnly", "Secure", "SameSite=Lax"]);
   });
 });
+
+import { decideSlidingLimit, slidingEstimate } from "@/lib/rate-limit-rules";
+describe("sliding window rate limit", () => {
+  const rule = { limit: 10, windowSec: 60 };
+  it("counts the previous window for its remaining overlap", () => {
+    // 15 s into the window: 75% of the previous 8 hits still count
+    expect(slidingEstimate(8, 3, 15_000, 60)).toBe(9);
+  });
+  it("blocks a burst across the window boundary that fixed windows allowed", () => {
+    expect(decideSlidingLimit(10, 1, rule, 1_000).ok).toBe(false);
+  });
+  it("allows once the previous window's weight has faded", () => {
+    expect(decideSlidingLimit(10, 1, rule, 59_000).ok).toBe(true);
+  });
+});
