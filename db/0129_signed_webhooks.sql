@@ -32,8 +32,8 @@ alter table public.webhook_endpoints enable row level security;
 alter table public.webhook_deliveries enable row level security;
 drop policy if exists rout_scope on public.webhook_endpoints;
 create policy rout_scope on public.webhook_endpoints
-  using (owner_user_id::text = public.rout_current_user_id())
-  with check (owner_user_id::text = public.rout_current_user_id());
+  using (owner_user_id = public.rout_current_user_id())
+  with check (owner_user_id = public.rout_current_user_id());
 -- webhook_deliveries: server-only (no policy).
 
 do $$ begin
