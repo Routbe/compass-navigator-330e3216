@@ -27,6 +27,8 @@ async function q(body: unknown): Promise<any> {
 }
 
 const dryRun = process.argv.includes("--dry-run");
+// --only=a.sql,b.sql applies just those files (e.g. to hold back a migration waiting on a deploy).
+const only = process.argv.find((a) => a.startsWith("--only="))?.slice(7).split(",").filter(Boolean);
 const dir = join(import.meta.dir, "..", "db");
 const files = listMigrationFiles(dir);
 await q({
@@ -47,6 +49,7 @@ const record = (file: string) => ({
 });
 for (const step of planMigrations(files, done)) {
   const { file } = step;
+  if (only && !only.includes(file)) continue;
   if (dryRun) {
     console.log(`… ${step.action === "run" ? "pending" : "record "} ${file}`);
     continue;
