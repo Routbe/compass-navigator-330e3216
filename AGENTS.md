@@ -67,6 +67,4 @@
 
 - Rate limits use a two-bucket sliding window (`decideSlidingLimit` in rate-limit-rules.ts) over the Neon `rate_limits` table; public routes call `guardShared`. Why: fixed windows allowed double bursts at boundaries and per-worker memory is not shared.
 - "/" on a verified custom domain is decided only by pure `root-redirect.ts` (db/0128 `root_redirect_type/url`), applied in `customDomainRootMiddleware` in src/start.ts; custom URLs must pass `validRootRedirectUrl`. Why: one tested rule, no open redirects.
-- Outbound webhooks are signed only via `webhooks/signature.ts` (`X-Rout-Signature: t=..,v1=hmac`) and delivered from the `webhook_deliveries` queue by the deliver-webhooks cron with `nextRetryDelaySec` backoff; endpoint secrets are sealed. Why: receivers can verify origin and replay window, failures retry without blocking.
-- client_credentials tokens follow pure `oauth/m2m-rules.ts` (exactly 900 s, never identity scopes, confidential clients only). Why: a machine token must never act as a person.
 - Hold back a migration by applying others with `migrate-gateway.ts --only=<files>`. Why: some files wait on a deploy.
