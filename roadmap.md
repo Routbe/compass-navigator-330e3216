@@ -85,7 +85,7 @@
 - [x] F2 ensureStepUpSession (120s, passkey/TOTP, e-mail alleen als fallback) op vault export, account delete, client secrets, teamrollen + modal + tests
 - [x] F3 sliding-window rate limiter (Neon) op publieke endpoints + CSP publieke profielen
 - [x] F4 X-Rout-Signature webhooks + retry-queue; client_credentials (15 min)
-- [ ] Platform-iconen (PeerTube, Vimeo, Dailymotion, Tumblr, Lemmy, Misskey) + booking-icoon
+- [x] Platform-iconen (PeerTube, Vimeo, Dailymotion, Tumblr, Lemmy, Misskey) + booking-icoon
 - [ ] /studio/account: identiteitskaart dynamisch, betaling niet als verificatie, 'Sociale accounts & verificatie' weg
 - [ ] Beveiligingscentrum (3 lagen) + user_mfa_methods + vertalingen + herstelcodes met step-up
 - [ ] Sticky tabbalken + actieve tab in beeld
