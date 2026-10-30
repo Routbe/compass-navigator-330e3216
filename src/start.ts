@@ -80,7 +80,28 @@ const appModeMiddleware = createMiddleware().server(async ({ request, next }) =>
 
 // Sessions are carried by the httpOnly `rout_session` cookie (Neon), so no
 // client-side token attacher is needed on server functions.
+/** "/" on a member's verified custom domain follows its root redirect (db/0128). */
+const customDomainRootMiddleware = createMiddleware().server(async ({ request, next }) => {
+  const url = new URL(request.url);
+  if (url.pathname !== "/" || (request.method !== "GET" && request.method !== "HEAD")) return next();
+  const { isCustomDomainHost, rootRedirectTarget, ROOT_REDIRECT_TYPES } = await import("./lib/root-redirect");
+  const host = request.headers.get("x-forwarded-host") ?? url.host;
+  if (!isCustomDomainHost(host)) return next();
+  try {
+    const { rootRedirectForHost } = await import("./lib/domains.server");
+    const cfg = await rootRedirectForHost(host);
+    if (cfg) {
+      const type = (ROOT_REDIRECT_TYPES as readonly string[]).includes(cfg.type) ? (cfg.type as (typeof ROOT_REDIRECT_TYPES)[number]) : "profile_hub";
+      const to = rootRedirectTarget({ type, url: cfg.url, profileHandle: cfg.handle });
+      if (to) return new Response(null, { status: 302, headers: { location: to, "cache-control": "no-store" } });
+    }
+  } catch (error) {
+    console.warn("[custom-domain-root] skipped:", (error as Error)?.message);
+  }
+  return next();
+});
+
 export const startInstance = createStart(() => ({
   functionMiddleware: [],
-  requestMiddleware: [errorMiddleware, appModeMiddleware, securityHeadersMiddleware, csrfMiddleware],
+  requestMiddleware: [errorMiddleware, appModeMiddleware, customDomainRootMiddleware, securityHeadersMiddleware, csrfMiddleware],
 }));
