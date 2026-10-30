@@ -46,8 +46,40 @@ export const Route = createFileRoute("/api_/public/oauth/token")({
             return Response.json(await exchangeRefreshToken(input),{ headers: { ...cors,"cache-control":"no-store",pragma:"no-cache" } });
           } catch(error) { return tokenFailure(error); }
         }
+        if (form.get("grant_type") === "client_credentials") {
+          let id = form.get("client_id");
+          let secret = form.get("client_secret");
+          const auth = request.headers.get("authorization");
+          if (auth?.toLowerCase().startsWith("basic ")) {
+            if (secret) return fail("invalid_client", "Gebruik slechts één client-authenticatiemethode.", 401);
+            try {
+              const [a, b] = atob(auth.slice(6)).split(":");
+              id = decodeURIComponent(a ?? "");
+              secret = decodeURIComponent(b ?? "");
+            } catch {
+              return fail("invalid_client", "Ongeldige client-authenticatie.", 401);
+            }
+          }
+          if (!id || !secret) return fail("invalid_client", "Client-authenticatie vereist.", 401);
+          try {
+            const { authenticateOAuthClient, issuer, signJwt } = await import("@/lib/oauth/provider.server");
+            const client = await authenticateOAuthClient(id, secret, clientIp(request), true);
+            const { m2mClaims, m2mScopes, M2M_TOKEN_TTL_SEC } = await import("@/lib/oauth/m2m-rules");
+            const scopes = m2mScopes(form.get("scope"), client.scopes);
+            if (!scopes) return fail("invalid_scope", "Deze scopes zijn niet toegestaan voor machine-toegang.");
+            const claims = m2mClaims({ issuer: issuer(), clientId: id, scopes, nowSec: Math.floor(Date.now() / 1000), jti: crypto.randomUUID() });
+            const { recordSecurityEvent } = await import("@/lib/audit-log.server");
+            void recordSecurityEvent({ eventType: "oauth.m2m_token", payload: { clientId: id, scopes } });
+            return Response.json(
+              { access_token: await signJwt(claims), token_type: "Bearer", expires_in: M2M_TOKEN_TTL_SEC, scope: scopes.join(" ") },
+              { headers: { ...cors, "cache-control": "no-store", pragma: "no-cache" } },
+            );
+          } catch {
+            return fail("invalid_client", "Ongeldige client.", 401);
+          }
+        }
         if (form.get("grant_type") !== "authorization_code") {
-          return fail("unsupported_grant_type", "Alleen authorization_code wordt ondersteund.");
+          return fail("unsupported_grant_type", "Ondersteund: authorization_code, refresh_token, client_credentials.");
         }
         const code = form.get("code");
         const redirectUri = form.get("redirect_uri");
