@@ -13,6 +13,10 @@ export const Route = createFileRoute("/s/$slug")({
         const { resolveShortLink, redirectResponse, rateLimitedResponse, pausedResponse } =
           await import("@/lib/short-link-redirect.server");
         const { RateLimitError } = await import("@/lib/rate-limit.server");
+        const { guardShared } = await import("@/lib/rate-limit-db.server");
+        const { RATE_RULES } = await import("@/lib/rate-limit-rules");
+        const shared = await guardShared(request, "short-link", RATE_RULES.shortLink);
+        if (shared) return shared;
         try {
           const result = await resolveShortLink(params.slug, request);
           if (result?.status === "ok") return redirectResponse(result.targetUrl);

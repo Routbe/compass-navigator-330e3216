@@ -1,5 +1,5 @@
 import { sql } from "@/lib/neon";
-import { decideRateLimit, windowStartMs, type RateRule } from "@/lib/rate-limit-rules";
+import { decideSlidingLimit, windowStartMs, type RateRule } from "@/lib/rate-limit-rules";
 
 /**
  * Database-backed limits (db/64) so every server instance shares one counter.
@@ -16,15 +16,19 @@ export async function hitRateLimit(name: string, subject: string, rule: RateRule
   const now = Date.now();
   try {
     const bucket = `${name}:${await sha256Hex(subject)}`;
-    const start = new Date(windowStartMs(now, rule.windowSec)).toISOString();
-    const rows = (await sql`insert into public.rate_limits (bucket, window_start, hits)
+    const startMs = windowStartMs(now, rule.windowSec);
+    const start = new Date(startMs).toISOString();
+    const prevStart = new Date(startMs - rule.windowSec * 1000).toISOString();
+    const rows = (await sql`with up as (insert into public.rate_limits (bucket, window_start, hits)
       values (${bucket}, ${start}, 1)
       on conflict (bucket, window_start) do update set hits = public.rate_limits.hits + 1
-      returning hits`) as { hits: number }[];
+      returning hits)
+      select (select hits from up) as hits,
+             coalesce((select hits from public.rate_limits where bucket = ${bucket} and window_start = ${prevStart}), 0) as prev`) as { hits: number; prev: number }[];
     if (Math.random() < 0.01) {
       void sql`delete from public.rate_limits where window_start < now() - interval '1 day'`.catch(() => {});
     }
-    return decideRateLimit(Number(rows[0]?.hits ?? 1), rule, now);
+    return decideSlidingLimit(Number(rows[0]?.prev ?? 0), Number(rows[0]?.hits ?? 1), rule, now);
   } catch (error) {
     console.warn(`[rate-limit] ${name} skipped:`, (error as Error)?.message);
     return { ok: true, retryAfter: 0 };
@@ -38,4 +42,12 @@ export function clientIp(request: Request): string {
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     "unknown"
   );
+}
+
+/** Shared (all instances) sliding-window guard for public HTTP endpoints; null = allowed. */
+export async function guardShared(request: Request, name: string, rule: RateRule): Promise<Response | null> {
+  const r = await hitRateLimit(name, clientIp(request), rule);
+  if (r.ok) return null;
+  const { tooManyRequests } = await import("@/lib/rate-limit-rules");
+  return tooManyRequests(r.retryAfter);
 }
