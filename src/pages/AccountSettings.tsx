@@ -139,7 +139,7 @@ export default function AccountSettings() {
 
   if (loading || !user) {
     return (
-      <AppLayout title="Settings &amp; security" crumbs={[{ label: "Settings" }]}>
+      <AppLayout title="Instellingen &amp; beveiliging" crumbs={[{ label: "Instellingen" }]}>
         <div className="flex min-h-[40vh] items-center justify-center">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
@@ -279,9 +279,9 @@ export default function AccountSettings() {
 
   return (
     <AppLayout
-      title="Settings &amp; security"
+      title="Instellingen &amp; beveiliging"
       description={`Signed in as ${user.email}`}
-      crumbs={[{ label: "Settings" }]}
+      crumbs={[{ label: "Instellingen" }]}
     >
       <Tabs value={tab} onValueChange={(v) => setTab(parseTab(v))} className="mt-4">
         <TabsList className="flex h-auto w-full justify-start gap-1 overflow-x-auto whitespace-nowrap p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap">
@@ -359,7 +359,7 @@ export default function AccountSettings() {
 
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                Display Name
+                Weergavenaam
               </label>
               <Input
                 value={displayName}
@@ -374,7 +374,7 @@ export default function AccountSettings() {
               disabled={savingProfile}
               className="h-11 w-full sm:w-auto"
             >
-              Save profile
+              Profiel opslaan
             </Button>
           </section>
 
@@ -459,7 +459,7 @@ export default function AccountSettings() {
           <section className="space-y-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="flex items-center gap-2 text-lg font-medium">
-                <ShieldCheck className="h-4 w-4" /> Two-Factor Authentication (2FA)
+                <ShieldCheck className="h-4 w-4" /> Twee-staps-verificatie (2FA)
               </h2>
               <Badge
                 className={
@@ -476,7 +476,7 @@ export default function AccountSettings() {
             </p>
             {mfaEnabled ? (
               <Button onClick={disable2fa} variant="outline" className="h-11 w-full sm:w-auto">
-                Turn off 2FA
+                2FA uitschakelen
               </Button>
             ) : (
               <Button onClick={enable2fa} variant="outline" className="h-11 w-full sm:w-auto">
@@ -487,7 +487,7 @@ export default function AccountSettings() {
 
           <section className="space-y-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
             <h2 className="flex items-center gap-2 text-lg font-medium">
-              <Monitor className="h-4 w-4" /> Active Sessions
+              <Monitor className="h-4 w-4" /> Actieve sessies
             </h2>
             <div className="rounded-xl border border-border bg-background p-3">
               <p className="text-sm font-medium text-foreground">
@@ -496,11 +496,11 @@ export default function AccountSettings() {
                   : "This device"}
               </p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Current session · last active just now
+                Huidige sessie · zojuist actief
               </p>
             </div>
             <Button onClick={signOutOthers} variant="outline" className="h-11 w-full sm:w-auto">
-              Sign out of all other sessions
+              Overal elders uitloggen
             </Button>
           </section>
 
