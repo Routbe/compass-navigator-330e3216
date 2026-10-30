@@ -445,7 +445,7 @@ export default function AccountSettings() {
               className="input-field h-11 rounded-xl"
             />
             <Button onClick={changeEmail} disabled={busyEmail} className="h-11 w-full sm:w-auto">
-              Update email
+              E-mailadres wijzigen
             </Button>
           </section>
 
@@ -505,7 +505,7 @@ export default function AccountSettings() {
           </section>
 
           <section className="space-y-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
-            <h2 className="text-lg font-medium">Developer access</h2>
+            <h2 className="text-lg font-medium">Ontwikkelaarstoegang</h2>
             <p className="text-sm text-muted-foreground">
               Manage apps, API keys, webhooks and MCP connectors in the Developer Console.
             </p>
