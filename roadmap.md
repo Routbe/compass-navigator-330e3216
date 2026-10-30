@@ -84,12 +84,13 @@
 - [x] F1 hash-chained security_audit_logs (db/0127) + append-only trigger + HMAC checkpoint-cron (365d retentie, checkpoints permanent)
 - [x] F2 ensureStepUpSession (120s, passkey/TOTP, e-mail alleen als fallback) op vault export, account delete, client secrets, teamrollen + modal + tests
 - [x] F3 sliding-window rate limiter (Neon) op publieke endpoints + CSP publieke profielen
-- [ ] F4 X-Rout-Signature webhooks + retry-queue; client_credentials (15 min)
+- [x] F4 X-Rout-Signature webhooks + retry-queue; client_credentials (15 min)
 - [ ] Platform-iconen (PeerTube, Vimeo, Dailymotion, Tumblr, Lemmy, Misskey) + booking-icoon
 - [ ] /studio/account: identiteitskaart dynamisch, betaling niet als verificatie, 'Sociale accounts & verificatie' weg
 - [ ] Beveiligingscentrum (3 lagen) + user_mfa_methods + vertalingen + herstelcodes met step-up
 - [ ] Sticky tabbalken + actieve tab in beeld
-- [ ] Custom domain root redirect (db/0128) + Studio-keuze
+- [x] Custom domain root redirect (db/0128) + Studio-keuze
 - [ ] Scoped theme: overrides ook voor vorm/typografie/radius/kleuren
 - [x] Neon gekoppeld (31/10): 141 tabellen, alleen 0125 bewust open
+- [ ] Webhook-eindpunten beheren in console (UI + URL-check tegen privé-adressen)
 - [ ] Nieuwe migraties 0128-0130 op Neon toepassen
