@@ -78,6 +78,11 @@ export default function AccountSettings() {
   const search = useSearch({ strict: false }) as { tab?: string };
   const tab = parseTab(search.tab);
 
+  useEffect(() => {
+    document
+      .querySelector('[data-sticky-tabs] [role="tab"][data-state="active"]')
+      ?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  }, [tab]);
   const setTab = (next: SettingsTab) => {
     nav(`/studio/account?tab=${next}`, { replace: true });
   };
@@ -284,7 +289,7 @@ export default function AccountSettings() {
       crumbs={[{ label: "Instellingen" }]}
     >
       <Tabs value={tab} onValueChange={(v) => setTab(parseTab(v))} className="mt-4">
-        <TabsList className="flex h-auto w-full justify-start gap-1 overflow-x-auto whitespace-nowrap p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap">
+        <TabsList data-sticky-tabs className="sticky-tabbar top-0 flex h-auto w-full justify-start rounded-none gap-1 overflow-x-auto whitespace-nowrap p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap">
           <TabsTrigger className="h-9 shrink-0 px-3" value="profile">
             {t("settings.tabs.profile")}
           </TabsTrigger>
