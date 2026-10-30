@@ -236,6 +236,16 @@ html {
 
 /* Always-white sheet for the live preview so the QR stays scannable
    and print-accurate, even when the app runs in dark mode. */
+/* Sticky tab bars: warm, slightly blurred so content never shows through. */
+@utility sticky-tabbar {
+  position: sticky;
+  z-index: 30;
+  background: hsl(var(--background) / 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid hsl(var(--foreground) / 0.06);
+}
+
 @utility preview-sheet {
   background-color: #ffffff;
   color: #1c1917;

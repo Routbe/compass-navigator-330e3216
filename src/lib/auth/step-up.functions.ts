@@ -45,14 +45,20 @@ export const completeStepUp = createServerFn({ method: "POST" })
       if (!data.code) throw new Error("Vul de 6-cijferige code in.");
       const { createRoutAuth } = await import("@/lib/better-auth.server");
       try {
-        await createRoutAuth(request).api.verifyTOTP({ headers: request.headers, body: { code: data.code } });
+        // The twoFactor plugin adds verifyTOTP; the factory's return type does not carry plugin endpoints.
+        const api = createRoutAuth(request).api as unknown as {
+          verifyTOTP: (o: { headers: Headers; body: { code: string } }) => Promise<unknown>;
+        };
+        await api.verifyTOTP({ headers: request.headers, body: { code: data.code } });
       } catch {
         throw new Error("De code klopt niet.");
       }
     } else {
       // Passkey: the browser just completed a WebAuthn sign-in, which created a new session.
       const { createRoutAuth } = await import("@/lib/better-auth.server");
-      const s = await createRoutAuth(request).api.getSession({ headers: request.headers });
+      const s = (await createRoutAuth(request).api.getSession({ headers: request.headers })) as
+        | { session?: { createdAt?: string | Date } }
+        | null;
       const created = s?.session?.createdAt ? new Date(s.session.createdAt).getTime() : 0;
       if (!created || Date.now() - created > STEP_UP_MAX_AGE_SEC * 1000) {
         throw new Error("Passkey-verificatie niet gevonden. Probeer opnieuw.");

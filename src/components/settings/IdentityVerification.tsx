@@ -57,10 +57,14 @@ export function IdentityVerification() {
         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
       ) : s?.isVerified ? (
         <div className="space-y-2">
-          <p className="flex items-center gap-2 text-sm font-medium text-primary">
-            <BadgeCheck className="h-4 w-4" aria-hidden /> Geverifieerd
-            {s.provider === "w_identity" ? " via W Identity" : s.provider === "didit" ? " via paspoortscan" : ""}
-          </p>
+          <div role="status" className="flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/10 p-3">
+            <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden />
+            <p className="text-sm text-foreground">
+              <span className="font-semibold">Identiteit Geverifieerd</span> — Je account is gekoppeld aan een unieke,
+              geverifieerde menselijke identiteit.
+              {s.provider === "w_identity" ? " (W Identity)" : s.provider === "didit" ? " (paspoortscan)" : ""}
+            </p>
+          </div>
           <label className="block text-xs text-muted-foreground" htmlFor="verified-real-name">
             Officiële naam
           </label>

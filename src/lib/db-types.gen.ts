@@ -5,6 +5,7 @@ export type JsonValue = string | number | boolean | null | JsonValue[] | { [key:
 
 export type PublicAppRole = "admin" | "moderator" | "user";
 export type PublicIdentityProvider = "w_identity" | "didit" | "manual";
+export type PublicRootRedirectKind = "profile_hub" | "custom_url" | "rout_main" | "none";
 export type PublicWorkspaceRole = "owner" | "admin" | "developer" | "editor";
 
 export interface NeonAuthAccountRow {
@@ -584,6 +585,8 @@ export interface PublicCustomDomainsRow {
   "short_links_enabled": boolean;
   "created_at": string | Date;
   "updated_at": string | Date;
+  "root_redirect_type": PublicRootRedirectKind;
+  "root_redirect_url": string | null;
 }
 
 export interface PublicDiditMonthlyUsageRow {
@@ -1733,6 +1736,31 @@ export interface PublicWalletsRow {
   "updated_at": string | Date;
 }
 
+export interface PublicWebhookDeliveriesRow {
+  "id": string;
+  "endpoint_id": string;
+  "event_type": string;
+  "payload_json": JsonValue;
+  "attempts": number;
+  "next_attempt_at": string | Date;
+  "last_status": number | null;
+  "delivered_at": string | Date | null;
+  "failed_at": string | Date | null;
+  "created_at": string | Date;
+}
+
+export interface PublicWebhookEndpointsRow {
+  "id": string;
+  "owner_user_id": string;
+  "workspace_id": string | null;
+  "url": string;
+  "events": Array<string>;
+  "secret_ciphertext": string;
+  "secret_iv": string;
+  "active": boolean;
+  "created_at": string | Date;
+}
+
 export interface PublicWebhookEventsRow {
   "id": string;
   "source": string;
@@ -1963,6 +1991,8 @@ export interface DbTables {
   "public.verification_payments": PublicVerificationPaymentsRow;
   "public.wallet_transactions": PublicWalletTransactionsRow;
   "public.wallets": PublicWalletsRow;
+  "public.webhook_deliveries": PublicWebhookDeliveriesRow;
+  "public.webhook_endpoints": PublicWebhookEndpointsRow;
   "public.webhook_events": PublicWebhookEventsRow;
   "public.workspace_invites": PublicWorkspaceInvitesRow;
   "public.workspace_members": PublicWorkspaceMembersRow;

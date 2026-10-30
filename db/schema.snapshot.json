@@ -31,6 +31,16 @@
     },
     {
       "schema": "public",
+      "name": "root_redirect_kind",
+      "labels": [
+        "profile_hub",
+        "custom_url",
+        "rout_main",
+        "none"
+      ]
+    },
+    {
+      "schema": "public",
       "name": "workspace_role",
       "labels": [
         "owner",
@@ -5597,6 +5607,22 @@
           "default": "now()",
           "identity": null,
           "generated": null
+        },
+        {
+          "name": "root_redirect_type",
+          "type": "root_redirect_kind",
+          "notNull": true,
+          "default": "'profile_hub'::root_redirect_kind",
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "root_redirect_url",
+          "type": "text",
+          "notNull": false,
+          "default": null,
+          "identity": null,
+          "generated": null
         }
       ],
       "constraints": [
@@ -5609,6 +5635,11 @@
           "name": "custom_domains_pkey",
           "kind": "p",
           "def": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "custom_domains_root_redirect_url_chk",
+          "kind": "c",
+          "def": "CHECK ((((root_redirect_type <> 'custom_url'::root_redirect_kind) AND (root_redirect_url IS NULL)) OR ((root_redirect_type = 'custom_url'::root_redirect_kind) AND (root_redirect_url ~ '^https://[^\\s/?#]+[^\\s]*$'::text) AND (char_length(root_redirect_url) <= 2048))))"
         },
         {
           "name": "custom_domains_user_id_fkey",
@@ -16573,6 +16604,239 @@
           "cmd": "UPDATE",
           "using": "(user_id = current_app_user_id())",
           "check": "(user_id = current_app_user_id())"
+        }
+      ],
+      "grants": {
+        "rout_app": [
+          "DELETE",
+          "INSERT",
+          "SELECT",
+          "UPDATE"
+        ]
+      }
+    },
+    {
+      "schema": "public",
+      "name": "webhook_deliveries",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "endpoint_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "event_type",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "payload_json",
+          "type": "jsonb",
+          "notNull": true,
+          "default": null,
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "attempts",
+          "type": "integer",
+          "notNull": true,
+          "default": "0",
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "next_attempt_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": "now()",
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "last_status",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "delivered_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "failed_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": "now()",
+          "identity": null,
+          "generated": null
+        }
+      ],
+      "constraints": [
+        {
+          "name": "webhook_deliveries_endpoint_id_fkey",
+          "kind": "f",
+          "def": "FOREIGN KEY (endpoint_id) REFERENCES webhook_endpoints(id) ON DELETE CASCADE"
+        },
+        {
+          "name": "webhook_deliveries_event_type_check",
+          "kind": "c",
+          "def": "CHECK (((char_length(event_type) >= 1) AND (char_length(event_type) <= 80)))"
+        },
+        {
+          "name": "webhook_deliveries_pkey",
+          "kind": "p",
+          "def": "PRIMARY KEY (id)"
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX webhook_deliveries_due_idx ON public.webhook_deliveries USING btree (next_attempt_at) WHERE ((delivered_at IS NULL) AND (failed_at IS NULL))"
+      ],
+      "triggers": [],
+      "rls": true,
+      "forceRls": false,
+      "policies": [],
+      "grants": {
+        "rout_app": [
+          "INSERT",
+          "SELECT",
+          "UPDATE"
+        ]
+      }
+    },
+    {
+      "schema": "public",
+      "name": "webhook_endpoints",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "owner_user_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "workspace_id",
+          "type": "uuid",
+          "notNull": false,
+          "default": null,
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "url",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "events",
+          "type": "text[]",
+          "notNull": true,
+          "default": "'{}'::text[]",
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "secret_ciphertext",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "secret_iv",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "notNull": true,
+          "default": "true",
+          "identity": null,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": "now()",
+          "identity": null,
+          "generated": null
+        }
+      ],
+      "constraints": [
+        {
+          "name": "webhook_endpoints_pkey",
+          "kind": "p",
+          "def": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "webhook_endpoints_url_check",
+          "kind": "c",
+          "def": "CHECK (((url ~ '^https://'::text) AND (char_length(url) <= 2048)))"
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX webhook_endpoints_owner_idx ON public.webhook_endpoints USING btree (owner_user_id)"
+      ],
+      "triggers": [],
+      "rls": true,
+      "forceRls": false,
+      "policies": [
+        {
+          "name": "rout_scope",
+          "permissive": true,
+          "roles": [
+            "public"
+          ],
+          "cmd": "ALL",
+          "using": "(owner_user_id = rout_current_user_id())",
+          "check": "(owner_user_id = rout_current_user_id())"
         }
       ],
       "grants": {

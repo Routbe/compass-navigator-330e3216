@@ -994,7 +994,7 @@ export function ProfileEditor({ variant = "verified", pageMode = "profile", onPa
       <div
         role="tablist"
         aria-label="Studio"
-        className="sticky top-14 z-20 flex w-full gap-1 overflow-x-auto bg-transparent p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="sticky-tabbar top-14 flex w-full gap-1 overflow-x-auto p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {visibleTabs.map(({ id }) => (
           <Button
@@ -1005,7 +1005,10 @@ export function ProfileEditor({ variant = "verified", pageMode = "profile", onPa
             data-tour={`studio-tab-${id}`}
             aria-selected={tab === id}
             title={t(`studio.tab.${id}`)}
-            onClick={() => setTab(id)}
+            onClick={(e) => {
+              setTab(id);
+              e.currentTarget.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+            }}
             className={cn(
               "flex h-9 flex-1 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border-0 px-3 text-xs shadow-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               tab === id

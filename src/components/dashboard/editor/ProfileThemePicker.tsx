@@ -91,7 +91,7 @@ export function ProfileThemePicker({
         <AccordionContent className="space-y-4 pb-5">
           <div className="space-y-2">
             <label className="input-label" htmlFor="p-name">
-              Display Name
+              Weergavenaam
             </label>
             <Input
               id="p-name"

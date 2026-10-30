@@ -23,7 +23,6 @@ import { AvatarUpload } from "@/components/settings/AvatarUpload";
 import { PhoneVerification } from "@/components/settings/PhoneVerification";
 import { IdentityVerification } from "@/components/settings/IdentityVerification";
 import { IdentitiesPanel } from "@/components/settings/IdentitiesPanel";
-import { SocialIdentityVerify } from "@/components/settings/SocialIdentityVerify";
 import { FreezeAccountPanel } from "@/components/settings/FreezeAccountPanel";
 import { MergeAccountWizard } from "@/components/settings/MergeAccountWizard";
 import { ConvertToWorkspaceWizard } from "@/components/settings/ConvertToWorkspaceWizard";
@@ -79,6 +78,11 @@ export default function AccountSettings() {
   const search = useSearch({ strict: false }) as { tab?: string };
   const tab = parseTab(search.tab);
 
+  useEffect(() => {
+    document
+      .querySelector('[data-sticky-tabs] [role="tab"][data-state="active"]')
+      ?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  }, [tab]);
   const setTab = (next: SettingsTab) => {
     nav(`/studio/account?tab=${next}`, { replace: true });
   };
@@ -140,7 +144,7 @@ export default function AccountSettings() {
 
   if (loading || !user) {
     return (
-      <AppLayout title="Settings &amp; security" crumbs={[{ label: "Settings" }]}>
+      <AppLayout title="Instellingen &amp; beveiliging" crumbs={[{ label: "Instellingen" }]}>
         <div className="flex min-h-[40vh] items-center justify-center">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
@@ -158,7 +162,7 @@ export default function AccountSettings() {
       .update({ display_name: displayName.trim() || null, avatar_url: avatarUrl })
       .eq("id", user.id);
     setSavingProfile(false);
-    if (!result.ok) return toast.error(result.message ?? "Could not save your profile.");
+    if (!result.ok) return toast.error(result.message ?? "Je profiel kon niet opgeslagen worden.");
     if (profileError) return toast.error(profileError.message);
     toast.success("Profile saved");
   };
@@ -203,10 +207,10 @@ export default function AccountSettings() {
       console.error("[2fa] enable failed", e.code, e.status, e.message);
       if (e.code === "INVALID_PASSWORD") {
         return toast.error(mfaPassword
-          ? "That password is not correct."
-          : "Your account has a password: enter it once to start 2FA setup.");
+          ? "Dit wachtwoord klopt niet."
+          : "Je account heeft een wachtwoord: vul het één keer in om 2FA in te stellen.");
       }
-      if (e.status === 401) return toast.error("Your session expired. Sign in again and retry.");
+      if (e.status === 401) return toast.error("Je sessie is verlopen. Log opnieuw in en probeer nog eens.");
       return toast.error(`Could not start 2FA setup${e.message ? `: ${e.message}` : "."}`);
     }
     setMfaUri(res.data.totpURI);
@@ -217,7 +221,7 @@ export default function AccountSettings() {
     setMfaBusy(true);
     const res = await authClient.twoFactor.verifyTotp({ code: mfaCode });
     setMfaBusy(false);
-    if (res.error) return toast.error(res.error.message ?? "That code is not correct.");
+    if (res.error) return toast.error(res.error.message ?? "Deze code klopt niet.");
     setMfaEnabled(true);
     setMfaDialogOpen(false);
     toast.success("Two-factor authentication is on.");
@@ -239,7 +243,7 @@ export default function AccountSettings() {
       if (!ok) return toast.error("Deze code klopt niet of is verlopen.");
     }
     const res = await authClient.twoFactor.disable({ password: password || undefined } as never);
-    if (res.error) return toast.error(res.error.message ?? "Could not turn off 2FA.");
+    if (res.error) return toast.error(res.error.message ?? "2FA kon niet uitgeschakeld worden.");
     setMfaEnabled(false);
     toast.success("Two-factor authentication is off.");
   };
@@ -272,7 +276,7 @@ export default function AccountSettings() {
       URL.revokeObjectURL(url);
       toast.success("Export downloaded");
     } catch {
-      toast.error("Could not export account data.");
+      toast.error("Je accountgegevens konden niet geëxporteerd worden.");
     } finally {
       setExporting(false);
     }
@@ -280,12 +284,12 @@ export default function AccountSettings() {
 
   return (
     <AppLayout
-      title="Settings &amp; security"
+      title="Instellingen &amp; beveiliging"
       description={`Signed in as ${user.email}`}
-      crumbs={[{ label: "Settings" }]}
+      crumbs={[{ label: "Instellingen" }]}
     >
       <Tabs value={tab} onValueChange={(v) => setTab(parseTab(v))} className="mt-4">
-        <TabsList className="flex h-auto w-full justify-start gap-1 overflow-x-auto whitespace-nowrap p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap">
+        <TabsList data-sticky-tabs className="sticky-tabbar top-0 flex h-auto w-full justify-start rounded-none gap-1 overflow-x-auto whitespace-nowrap p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap">
           <TabsTrigger className="h-9 shrink-0 px-3" value="profile">
             {t("settings.tabs.profile")}
           </TabsTrigger>
@@ -360,7 +364,7 @@ export default function AccountSettings() {
 
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                Display Name
+                Weergavenaam
               </label>
               <Input
                 value={displayName}
@@ -375,7 +379,7 @@ export default function AccountSettings() {
               disabled={savingProfile}
               className="h-11 w-full sm:w-auto"
             >
-              Save profile
+              Profiel opslaan
             </Button>
           </section>
 
@@ -383,7 +387,6 @@ export default function AccountSettings() {
 
           <IdentityVerification />
 
-          <SocialIdentityVerify />
 
           <section className="space-y-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
             <h2 className="flex items-center gap-2 text-lg font-medium">
@@ -447,7 +450,7 @@ export default function AccountSettings() {
               className="input-field h-11 rounded-xl"
             />
             <Button onClick={changeEmail} disabled={busyEmail} className="h-11 w-full sm:w-auto">
-              Update email
+              E-mailadres wijzigen
             </Button>
           </section>
 
@@ -461,7 +464,7 @@ export default function AccountSettings() {
           <section className="space-y-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="flex items-center gap-2 text-lg font-medium">
-                <ShieldCheck className="h-4 w-4" /> Two-Factor Authentication (2FA)
+                <ShieldCheck className="h-4 w-4" /> Twee-staps-verificatie (2FA)
               </h2>
               <Badge
                 className={
@@ -478,7 +481,7 @@ export default function AccountSettings() {
             </p>
             {mfaEnabled ? (
               <Button onClick={disable2fa} variant="outline" className="h-11 w-full sm:w-auto">
-                Turn off 2FA
+                2FA uitschakelen
               </Button>
             ) : (
               <Button onClick={enable2fa} variant="outline" className="h-11 w-full sm:w-auto">
@@ -489,7 +492,7 @@ export default function AccountSettings() {
 
           <section className="space-y-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
             <h2 className="flex items-center gap-2 text-lg font-medium">
-              <Monitor className="h-4 w-4" /> Active Sessions
+              <Monitor className="h-4 w-4" /> Actieve sessies
             </h2>
             <div className="rounded-xl border border-border bg-background p-3">
               <p className="text-sm font-medium text-foreground">
@@ -498,16 +501,16 @@ export default function AccountSettings() {
                   : "This device"}
               </p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Current session · last active just now
+                Huidige sessie · zojuist actief
               </p>
             </div>
             <Button onClick={signOutOthers} variant="outline" className="h-11 w-full sm:w-auto">
-              Sign out of all other sessions
+              Overal elders uitloggen
             </Button>
           </section>
 
           <section className="space-y-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
-            <h2 className="text-lg font-medium">Developer access</h2>
+            <h2 className="text-lg font-medium">Ontwikkelaarstoegang</h2>
             <p className="text-sm text-muted-foreground">
               Manage apps, API keys, webhooks and MCP connectors in the Developer Console.
             </p>
@@ -582,7 +585,7 @@ export default function AccountSettings() {
       <Dialog open={mfaDialogOpen} onOpenChange={setMfaDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Set up authenticator app</DialogTitle>
+            <DialogTitle>Authenticator-app instellen</DialogTitle>
             <DialogDescription>
               Scan this QR code with your authenticator app, then enter the 6-digit code to confirm.
             </DialogDescription>

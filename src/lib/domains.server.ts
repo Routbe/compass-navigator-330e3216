@@ -166,3 +166,26 @@ export async function setSubdomainAliasFor(userId: string, handle: string) {
      where id = ${userId}
   `;
 }
+
+/** Root redirect config of a verified custom domain + the owner's public handle (db/0128). */
+export async function rootRedirectForHost(host: string) {
+  const clean = host.trim().toLowerCase().replace(/:\d+$/, "").replace(/\.$/, "");
+  const rows = (await sql`
+    select d.root_redirect_type::text as type, d.root_redirect_url as url,
+           case when coalesce(p.is_banned, false) = false and coalesce(p.is_suspended, false) = false
+                 and coalesce(p.status, 'active') not in ('frozen', 'banned', 'suspended')
+                 and coalesce((p.display_prefs->>'publicProfile')::boolean, true)
+                then p.username end as handle
+      from public.custom_domains d
+      left join public.profiles p on p.id = d.user_id
+     where d.domain = ${clean} and d.status = 'verified'
+     limit 1`) as Row[];
+  const r = rows[0];
+  if (!r) return null;
+  return { type: String(r["type"]), url: (r["url"] as string | null) ?? null, handle: (r["handle"] as string | null) ?? null };
+}
+
+export async function setRootRedirectFor(userId: string, id: string, type: string, url: string | null) {
+  await sql`update public.custom_domains set root_redirect_type = ${type}::public.root_redirect_kind,
+    root_redirect_url = ${url}, updated_at = now() where id = ${id} and user_id = ${userId}`;
+}

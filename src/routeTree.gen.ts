@@ -145,6 +145,7 @@ import { Route as ApiPublicCronAuditCheckpointRouteImport } from './routes/api_.
 import { Route as ApiPublicCronAvailabilityRouteImport } from './routes/api_.public.cron.availability'
 import { Route as ApiPublicCronCheckDnsRouteImport } from './routes/api_.public.cron.check-dns'
 import { Route as ApiPublicCronCleanupAssetsRouteImport } from './routes/api_.public.cron.cleanup-assets'
+import { Route as ApiPublicCronDeliverWebhooksRouteImport } from './routes/api_.public.cron.deliver-webhooks'
 import { Route as ApiPublicCronPurgeAccountsRouteImport } from './routes/api_.public.cron.purge-accounts'
 import { Route as ApiPublicCronPurgeAltchaRouteImport } from './routes/api_.public.cron.purge-altcha'
 import { Route as ApiPublicCronPurgeSharedFilesRouteImport } from './routes/api_.public.cron.purge-shared-files'
@@ -901,6 +902,12 @@ const ApiPublicCronCleanupAssetsRoute =
     path: '/api/public/cron/cleanup-assets',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicCronDeliverWebhooksRoute =
+  ApiPublicCronDeliverWebhooksRouteImport.update({
+    id: '/api_/public/cron/deliver-webhooks',
+    path: '/api/public/cron/deliver-webhooks',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicCronPurgeAccountsRoute =
   ApiPublicCronPurgeAccountsRouteImport.update({
     id: '/api_/public/cron/purge-accounts',
@@ -1296,6 +1303,7 @@ export interface FileRoutesByFullPath {
   '/api/public/cron/availability': typeof ApiPublicCronAvailabilityRoute
   '/api/public/cron/check-dns': typeof ApiPublicCronCheckDnsRoute
   '/api/public/cron/cleanup-assets': typeof ApiPublicCronCleanupAssetsRoute
+  '/api/public/cron/deliver-webhooks': typeof ApiPublicCronDeliverWebhooksRoute
   '/api/public/cron/purge-accounts': typeof ApiPublicCronPurgeAccountsRoute
   '/api/public/cron/purge-altcha': typeof ApiPublicCronPurgeAltchaRoute
   '/api/public/cron/purge-shared-files': typeof ApiPublicCronPurgeSharedFilesRoute
@@ -1473,6 +1481,7 @@ export interface FileRoutesByTo {
   '/api/public/cron/availability': typeof ApiPublicCronAvailabilityRoute
   '/api/public/cron/check-dns': typeof ApiPublicCronCheckDnsRoute
   '/api/public/cron/cleanup-assets': typeof ApiPublicCronCleanupAssetsRoute
+  '/api/public/cron/deliver-webhooks': typeof ApiPublicCronDeliverWebhooksRoute
   '/api/public/cron/purge-accounts': typeof ApiPublicCronPurgeAccountsRoute
   '/api/public/cron/purge-altcha': typeof ApiPublicCronPurgeAltchaRoute
   '/api/public/cron/purge-shared-files': typeof ApiPublicCronPurgeSharedFilesRoute
@@ -1657,6 +1666,7 @@ export interface FileRoutesById {
   '/api_/public/cron/availability': typeof ApiPublicCronAvailabilityRoute
   '/api_/public/cron/check-dns': typeof ApiPublicCronCheckDnsRoute
   '/api_/public/cron/cleanup-assets': typeof ApiPublicCronCleanupAssetsRoute
+  '/api_/public/cron/deliver-webhooks': typeof ApiPublicCronDeliverWebhooksRoute
   '/api_/public/cron/purge-accounts': typeof ApiPublicCronPurgeAccountsRoute
   '/api_/public/cron/purge-altcha': typeof ApiPublicCronPurgeAltchaRoute
   '/api_/public/cron/purge-shared-files': typeof ApiPublicCronPurgeSharedFilesRoute
@@ -1841,6 +1851,7 @@ export interface FileRouteTypes {
     | '/api/public/cron/availability'
     | '/api/public/cron/check-dns'
     | '/api/public/cron/cleanup-assets'
+    | '/api/public/cron/deliver-webhooks'
     | '/api/public/cron/purge-accounts'
     | '/api/public/cron/purge-altcha'
     | '/api/public/cron/purge-shared-files'
@@ -2018,6 +2029,7 @@ export interface FileRouteTypes {
     | '/api/public/cron/availability'
     | '/api/public/cron/check-dns'
     | '/api/public/cron/cleanup-assets'
+    | '/api/public/cron/deliver-webhooks'
     | '/api/public/cron/purge-accounts'
     | '/api/public/cron/purge-altcha'
     | '/api/public/cron/purge-shared-files'
@@ -2201,6 +2213,7 @@ export interface FileRouteTypes {
     | '/api_/public/cron/availability'
     | '/api_/public/cron/check-dns'
     | '/api_/public/cron/cleanup-assets'
+    | '/api_/public/cron/deliver-webhooks'
     | '/api_/public/cron/purge-accounts'
     | '/api_/public/cron/purge-altcha'
     | '/api_/public/cron/purge-shared-files'
@@ -2345,6 +2358,7 @@ export interface RootRouteChildren {
   ApiPublicCronAvailabilityRoute: typeof ApiPublicCronAvailabilityRoute
   ApiPublicCronCheckDnsRoute: typeof ApiPublicCronCheckDnsRoute
   ApiPublicCronCleanupAssetsRoute: typeof ApiPublicCronCleanupAssetsRoute
+  ApiPublicCronDeliverWebhooksRoute: typeof ApiPublicCronDeliverWebhooksRoute
   ApiPublicCronPurgeAccountsRoute: typeof ApiPublicCronPurgeAccountsRoute
   ApiPublicCronPurgeAltchaRoute: typeof ApiPublicCronPurgeAltchaRoute
   ApiPublicCronPurgeSharedFilesRoute: typeof ApiPublicCronPurgeSharedFilesRoute
@@ -3331,6 +3345,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCronCleanupAssetsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api_/public/cron/deliver-webhooks': {
+      id: '/api_/public/cron/deliver-webhooks'
+      path: '/api/public/cron/deliver-webhooks'
+      fullPath: '/api/public/cron/deliver-webhooks'
+      preLoaderRoute: typeof ApiPublicCronDeliverWebhooksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api_/public/cron/purge-accounts': {
       id: '/api_/public/cron/purge-accounts'
       path: '/api/public/cron/purge-accounts'
@@ -3955,6 +3976,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicCronAvailabilityRoute: ApiPublicCronAvailabilityRoute,
   ApiPublicCronCheckDnsRoute: ApiPublicCronCheckDnsRoute,
   ApiPublicCronCleanupAssetsRoute: ApiPublicCronCleanupAssetsRoute,
+  ApiPublicCronDeliverWebhooksRoute: ApiPublicCronDeliverWebhooksRoute,
   ApiPublicCronPurgeAccountsRoute: ApiPublicCronPurgeAccountsRoute,
   ApiPublicCronPurgeAltchaRoute: ApiPublicCronPurgeAltchaRoute,
   ApiPublicCronPurgeSharedFilesRoute: ApiPublicCronPurgeSharedFilesRoute,

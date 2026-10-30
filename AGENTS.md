@@ -28,7 +28,6 @@
 - 0000_baseline.sql is a squashed baseline covering <=110: run only on an empty database, otherwise recorded. After any migration run `bun scripts/schema-snapshot.ts` to refresh db/schema.snapshot.json + src/lib/db-types.gen.ts; CI replays all migrations on PGlite and must equal the snapshot, `--check` compares live. Why: the old files could not build an empty database.
 - "Login met ROUT" signing keys live only sealed (key-seal.server.ts, KEK from ROUT_PROVIDER_SIGNING_KEK, HMAC-derived per-kid AES-256-GCM); rules in key-rules.ts: 90-day auto rotation, 48 h JWKS grace, ES256 + exact kid or reject. Legacy plaintext keys are sealed only via scripts/seal-signing-keys.ts after all deployments run this code. Why: a database reader must never be able to forge ID tokens, and older deployments can only read plaintext.
 - Applied migrations are immutable; corrections use new delta files and checksum drift is reported, never silently repaired. Why: database history must remain reproducible.
-- Booking intake uses booking-engine/intake.ts for shared validation and sensitive-answer separation; external AI paths must never receive answers. Why: guest medical and dietary data stay private.
 - Profile booking navigation uses typed /$username/booking search context; selected UTC starts are accepted only when offered by current availability. Why: no hard reloads or trusting stale URL slots.
 - Deployment mode comes only from `src/lib/app-mode.ts` (`VITE_APP_MODE`/`APP_MODE`): `appModeMiddleware` in `src/start.ts` 404s admin paths in public mode and confines admin mode to the portal (noindex), `assertAdminRole` refuses in public mode, and `api_.auth.$.ts` refuses social providers in admin mode. Why: the split must hold server-side, never only in the UI.
 - Build mode filters route files via app-mode-routes.ts; admin files use admin.* names. Why: public bundles must exclude admin code.
@@ -64,3 +63,7 @@
 - Authenticated server functions run inside `withDbContext` (src/lib/neon.ts), so each query is a transaction that first sets `rout.user_id`/`rout.workspace_id`; RLS never trusts `rout.workspace_id`. Why: RLS can only be enforced when the database knows the caller.
 - Profile glass/scoped styling comes only from pure `src/lib/theme-engine.ts` (global `glass*` prefs + `themeOverrides[scope]`). Why: one rule for the Studio controls and the public page.
 - Security events are written only via `recordSecurityEvent` (audit-log.server.ts) into append-only, DB-hash-chained `security_audit_logs` (db/0127); rules in pure audit-chain.ts. Why: tampering must be provable.
+
+- Rate limits: two-bucket sliding window (`decideSlidingLimit`) over Neon `rate_limits`; public routes use `guardShared`. Why: no boundary bursts, shared across workers.
+- Custom-domain "/" redirects come only from pure `root-redirect.ts` (db/0128), applied in src/start.ts. Why: one tested rule, no open redirects.
+- Hold back a migration via `migrate-gateway.ts --only=<files>`. Why: some wait on a deploy.

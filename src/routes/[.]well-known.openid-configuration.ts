@@ -20,7 +20,7 @@ export const Route = createFileRoute("/.well-known/openid-configuration")({
             claims_parameter_supported: false,
             request_parameter_supported: false,
             request_uri_parameter_supported: false,
-            grant_types_supported: ["authorization_code", "refresh_token"],
+            grant_types_supported: ["authorization_code", "refresh_token", "client_credentials"],
             subject_types_supported: ["public", "pairwise"],
             revocation_endpoint: `${iss}/api/public/oauth/revoke`,
             introspection_endpoint: `${iss}/api/public/oauth/introspect`,
