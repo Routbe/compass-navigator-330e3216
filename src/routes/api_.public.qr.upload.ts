@@ -12,6 +12,10 @@ export const Route = createFileRoute("/api_/public/qr/upload")({
         const { guardRequest } = await import("@/lib/api-guard.server");
         const limited = guardRequest(request, "qr-upload", 20, 60000);
         if (limited) return limited;
+        const { guardShared } = await import("@/lib/rate-limit-db.server");
+        const { RATE_RULES } = await import("@/lib/rate-limit-rules");
+        const shared = await guardShared(request, "qr-upload", RATE_RULES.qrUpload);
+        if (shared) return shared;
 
         const { currentUser } = await import("@/lib/auth/session.server");
         const user = await currentUser().catch(() => null);

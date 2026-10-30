@@ -102,6 +102,8 @@ export const saveOAuthClient = createServerFn({ method: "POST" })
       if (data.id) {
         return { client: await updateClient(context.userId, data.id, input), clientSecret: null };
       }
+      const { ensureStepUpSession } = await import("@/lib/auth/step-up.server");
+      await ensureStepUpSession(context.userId, "oauth_secret");
       const { hitRateLimit } = await import("@/lib/rate-limit-db.server");
       const { RATE_RULES } = await import("@/lib/rate-limit-rules");
       const limit = await hitRateLimit("app-create", context.userId, RATE_RULES.appCreate);
@@ -434,6 +436,12 @@ export const decideAuthorizeRequest = createServerFn({ method: "POST" })
     authorizeSchema.extend({ allow: z.boolean(), richIdentityOptIn: z.boolean().optional() }).parse(data),
   )
   .handler(async ({ data, context }): Promise<{ redirectTo: string } | { error: string }> => {
+    {
+      const { hitRateLimit } = await import("@/lib/rate-limit-db.server");
+      const { RATE_RULES } = await import("@/lib/rate-limit-rules");
+      const rl = await hitRateLimit("oauth-authorize", context.userId, RATE_RULES.oauthAuthorize);
+      if (!rl.ok) return { error: "Te veel pogingen. Probeer het later opnieuw." };
+    }
     const checked = await checkRequest(data);
     if ("error" in checked) return { error: checked.error ?? "Ongeldige aanvraag." };
     const { client, scopes, stepUp } = checked;
