@@ -42,3 +42,4 @@
 - Booking engine (`src/lib/booking-engine`, db/104): instants are UTC timestamptz only; synced calendars store only HMAC id/start/end/blocking via `adapters/zero-knowledge.ts`; visitors read pre-computed `availability_cache` bit(96) days; booking = one batch (advisory lock per host+UTC day, assert, insert) backed by the GiST EXCLUDE. Why: no PII, no N+1, no double booking.
 
 - Outbound webhooks are signed only via `webhooks/signature.ts` (`X-Rout-Signature: t=..,v1=hmac`) and delivered from the `webhook_deliveries` queue by the deliver-webhooks cron with `nextRetryDelaySec` backoff; endpoint secrets are sealed. Why: receivers can verify origin and replay window, failures retry without blocking.
+- Booking intake uses booking-engine/intake.ts for shared validation and sensitive-answer separation; external AI paths must never receive answers. Why: guest medical and dietary data stay private.
